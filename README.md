@@ -7,7 +7,7 @@
 
 ## Description
 
-This is a simple command-line tool to slice video into many parts using FFmpeg. You can define each part duration, and the output format.
+This is a simple command-line tool to slice video into many parts using FFmpeg. You can define each part duration, the output format and much more.
 
 ## Installation
 
