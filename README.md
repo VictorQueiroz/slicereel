@@ -17,13 +17,11 @@ npm i -g slicereel
 
 ## Usage
 
-In the example below, all the parts will be saved in the `input.mp4.parts` folder. Each output file will have the same name as the input file, with the slice of the video duration. For instance, let's suppose `input.mp4` has 50 minutes of duration. The output files will be named as:
+In the example below, all the parts will be saved in the `input.mp4.parts` folder. Each output file will have the same name as the input file, with the slice of the video duration. For instance, let's suppose `input.mp4` has a total of 50 minutes of duration. The output files will be named as:
 
-```
-input.0s-20m.mp4
-input.20m-40m.mp4
-input.40m-50m.mp4
-```
+- input.0s-20m.mp4
+- input.20m-40m.mp4
+- input.40m-50m.mp4
 
 ```bash
 slicereel -i input.mp4 -o input.mp4.parts -d 20 --out-extension mp4
@@ -31,7 +29,7 @@ slicereel -i input.mp4 -o input.mp4.parts -d 20 --out-extension mp4
 
 ### Resizing the video
 
-When using the `--width` argument, the video aspect ratio will be automatically kept. In case the required width produces an odd height dimension, the width will be automatically adjusted so the height is divisible by 2, as this is required by `ffmpeg``.
+When using the `--width` argument, the video aspect ratio will be automatically kept. In case the required width produces an odd height dimension, the width will be automatically adjusted so the height is _divisible by 2_, as this is required by **FFmpeg**.
 
 ```bash
 slicereel -i input.mp4 -o input.mp4.parts --width 200
