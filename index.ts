@@ -37,6 +37,7 @@ import isOdd from "./isOdd";
     getNamedArgument(args, "--video-bitrate", getString) ?? "1M";
   const audioBitrate =
     getNamedArgument(args, "--audio-bitrate", getString) ?? "32k";
+  const clearOutDir = getArgument(args, "--rm") !== null;
   let width =
     getNamedArgument(args, "-w", getInteger) ??
     getNamedArgument(args, "--width", getInteger);
@@ -49,12 +50,18 @@ import isOdd from "./isOdd";
     throw new Error(`Input file ${inputFile} does not exist`);
   }
 
+  const spareArgument = args.shift();
+
+  if (spareArgument) {
+    throw new Error(`Unexpected argument ${spareArgument}`);
+  }
+
   assert.strict.ok(
     !outExtension.startsWith("."),
     "value passed to --out-extension must not start with a dot (i.e. --out-extension opus)"
   );
 
-  if (getArgument(args, "--rm") !== null) {
+  if (clearOutDir) {
     await fs.promises.rm(outDir, {
       recursive: true,
       force: true,
