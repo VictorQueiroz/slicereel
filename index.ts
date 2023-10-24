@@ -138,6 +138,9 @@ import getFileDuration from "./getFileDuration";
       inputFile,
       "-threads",
       `${threads}`,
+      /**
+       * audio bitrate
+       */
       "-b:a",
       audioBitrate
     );
@@ -164,6 +167,9 @@ import getFileDuration from "./getFileDuration";
         throw new Exception(`Unsupported output format ${outExtension}`);
       case "mp4":
         ffmpegArgs.push(
+          /**
+           * video bitrate
+           */
           "-b:v",
           videoBitrate,
           /**
