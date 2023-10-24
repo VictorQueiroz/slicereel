@@ -11,10 +11,10 @@ import assert from "assert";
 import fs from "fs";
 import path from "path";
 import getResolvedString from "./getResolvedString";
-import getStdout from "./getStdout";
 import Time from "./Time";
 import getRatio from "./getRatio";
 import isOdd from "./isOdd";
+import getFileDuration from "./getFileDuration";
 
 (async () => {
   const args = process.argv.slice(2);
@@ -83,30 +83,10 @@ import isOdd from "./isOdd";
    */
   partDuration *= Time.MINUTE;
 
-  const duration = await getStdout("ffprobe", [
-    "-i",
-    inputFile,
-    "-show_entries",
-    "format=duration",
-    "-v",
-    "quiet",
-    "-of",
-    "csv=p=0",
-  ]);
-
   /**
    * total duration of the file in seconds
    */
-  const totalDuration = parseFloat(duration);
-  assert.strict.ok(
-    !Number.isNaN(totalDuration),
-    `Invalid duration: ${duration}`
-  );
-  assert.strict.ok(
-    Number.isFinite(totalDuration),
-    `Invalid duration: ${duration}`
-  );
-  const partCount = Math.ceil(totalDuration / partDuration);
+  const totalDuration = await getFileDuration(inputFile);
 
   const ratio = await getRatio(inputFile);
 
@@ -126,6 +106,8 @@ import isOdd from "./isOdd";
   }
 
   const pending = new Array<Promise<void>>();
+
+  const partCount = Math.ceil(totalDuration / partDuration);
 
   for (let i = 0; i < partCount; i++) {
     if (pending.length >= concurrency) {
@@ -173,7 +155,7 @@ import isOdd from "./isOdd";
       case "opus":
         ffmpegArgs.push("-c:a", "libopus");
         if (width === null) {
-          console.error("ignoring --width argument");
+          console.warn("ignoring --width argument");
         }
         break;
       case "mkv":
