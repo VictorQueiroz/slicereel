@@ -1,0 +1,22 @@
+{
+  "devDependencies": {
+    "@types/node": "^18.18.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "version": "1.0.0",
+  "name": "slicereel",
+  "bin": {
+    "slicereel": "index.js"
+  },
+  "files": [
+    "*.{map,js,d.ts,ts}"
+  ],
+  "scripts": {
+    "prepublishOnly": "npx tsc -b . --force"
+  },
+  "dependencies": {
+    "child-process-utilities": "^0.0.10",
+    "cli-argument-helper": "^0.0.8"
+  }
+}
