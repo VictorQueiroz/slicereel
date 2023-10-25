@@ -4,7 +4,7 @@ import {
   getArgument,
   getInteger,
   getNamedArgument,
-  getString,
+  getString
 } from "cli-argument-helper";
 import { Exception, spawn } from "child-process-utilities";
 import assert from "assert";
@@ -15,16 +15,22 @@ import Time from "./Time";
 import getRatio from "./getRatio";
 import isOdd from "./isOdd";
 import getFileDuration from "./getFileDuration";
+import chalk from "chalk";
 
 (async () => {
   const args = process.argv.slice(2);
-  let partDuration =
+  const shouldPrintHelpText =
+    (getArgument(args, "-h") ?? getArgument(args, "--help")) !== null;
+  if (shouldPrintHelpText) {
+    fs.createReadStream(path.resolve(__dirname, "HELP")).pipe(process.stdout);
+    return;
+  }
+  const partDurationInMinutes =
     getNamedArgument(args, "--duration", getInteger) ??
     getNamedArgument(args, "-d", getInteger) ??
     60;
   const inputFile = getNamedArgument(args, "-i", getResolvedString);
   const concurrency = getNamedArgument(args, "--concurrency", getInteger) ?? 1;
-  const outDir = getNamedArgument(args, "-o", getResolvedString);
   const threads = getNamedArgument(args, "--threads", getInteger) ?? 1;
   const fps = getNamedArgument(args, "--fps", getInteger);
   const compat =
@@ -37,13 +43,30 @@ import getFileDuration from "./getFileDuration";
     getNamedArgument(args, "--video-bitrate", getString) ?? "1M";
   const audioBitrate =
     getNamedArgument(args, "--audio-bitrate", getString) ?? "32k";
-  const clearOutDir = getArgument(args, "--rm") !== null;
+  let clearOutDir = getArgument(args, "--rm") !== null;
   let width =
     getNamedArgument(args, "-w", getInteger) ??
     getNamedArgument(args, "--width", getInteger);
-  assert.strict.ok(partDuration !== null, "--duration is required");
+  assert.strict.ok(partDurationInMinutes !== null, "--duration is required");
   assert.strict.ok(inputFile !== null, "-i is required");
-  assert.strict.ok(outDir !== null, "-o is required");
+  let outDir = getNamedArgument(args, "-o", getResolvedString);
+  const forceClearOutDir = getArgument(args, "--force-rm") !== null;
+
+  if (outDir === null) {
+    assert.strict.ok(
+      !clearOutDir,
+      "You cannot use --rm without specifying an output directory. Use --force-rm to force deletion of the input file."
+    );
+    outDir = inputFile.replace(
+      new RegExp(`.${path.extname(inputFile)}$`),
+      ".slicereel.output.parts"
+    );
+    console.log("Automatically using output directory: %o", chalk.red(outDir));
+    clearOutDir = forceClearOutDir;
+  } else if (forceClearOutDir) {
+    throw new Exception("You cannot use --force-rm with --output");
+  }
+
   try {
     await fs.promises.access(inputFile, fs.constants.R_OK);
   } catch (reason) {
@@ -64,7 +87,7 @@ import getFileDuration from "./getFileDuration";
   if (clearOutDir) {
     await fs.promises.rm(outDir, {
       recursive: true,
-      force: true,
+      force: true
     });
   }
 
@@ -81,7 +104,7 @@ import getFileDuration from "./getFileDuration";
   /**
    * convert part duration to seconds
    */
-  partDuration *= Time.MINUTE;
+  const partDuration = partDurationInMinutes * Time.MINUTE;
 
   /**
    * total duration of the file in seconds
@@ -188,12 +211,12 @@ import getFileDuration from "./getFileDuration";
       videoFilters.set("fps", `${fps}`);
     }
 
-    ffmpegArgs.push(
-      "-vf",
-      Array.from(videoFilters)
-        .map(([k, v]) => `${k}=${v}`)
-        .join(",")
-    );
+      ffmpegArgs.push(
+        "-vf",
+        Array.from(videoFilters)
+          .map(([k, v]) => `${k}=${v}`)
+          .join(",")
+      );
 
     /**
      * add output file as the last argument
