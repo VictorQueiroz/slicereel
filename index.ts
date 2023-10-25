@@ -47,7 +47,6 @@ import TimeStringParser from "./TimeStringParser";
   let width =
     getNamedArgument(args, "-w", getInteger) ??
     getNamedArgument(args, "--width", getInteger);
-  assert.strict.ok(partDurationInMinutes !== null, "--duration is required");
   assert.strict.ok(inputFile !== null, "-i is required");
   let outDir = getNamedArgument(args, "-o", getResolvedString);
   const forceClearOutDir = getArgument(args, "--force-rm") !== null;
