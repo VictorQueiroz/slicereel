@@ -15,6 +15,7 @@ import Time from "./Time";
 import getRatio from "./getRatio";
 import isOdd from "./isOdd";
 import getFileDuration from "./getFileDuration";
+import TimeStringParser from "./TimeStringParser";
 
 (async () => {
   const args = process.argv.slice(2);
@@ -24,10 +25,10 @@ import getFileDuration from "./getFileDuration";
     fs.createReadStream(path.resolve(__dirname, "HELP")).pipe(process.stdout);
     return;
   }
-  const partDurationInMinutes =
-    getNamedArgument(args, "--duration", getInteger) ??
-    getNamedArgument(args, "-d", getInteger) ??
-    60;
+  const humanReadableDuration =
+    getNamedArgument(args, "--duration", getString) ??
+    getNamedArgument(args, "-d", getString) ??
+    "1h";
   const inputFile = getNamedArgument(args, "-i", getResolvedString);
   const concurrency = getNamedArgument(args, "--concurrency", getInteger) ?? 1;
   const threads = getNamedArgument(args, "--threads", getInteger) ?? 1;
@@ -101,9 +102,9 @@ import getFileDuration from "./getFileDuration";
   }
 
   /**
-   * convert part duration to seconds
+   * part duration in seconds
    */
-  const partDuration = partDurationInMinutes * Time.MINUTE;
+  const partDuration = new TimeStringParser(humanReadableDuration).parse();
 
   /**
    * total duration of the file in seconds

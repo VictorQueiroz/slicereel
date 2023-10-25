@@ -40,10 +40,10 @@ const lines: IArgumentDescription[] = [
   },
   {
     name: ["-d", "--duration"],
-    args: ["number"],
-    examples: [[30], [60], [120]],
-    defaultValue: 60,
-    description: ["Duration of each part in minutes."]
+    args: ["string"],
+    examples: [["30m"], ["1h"], ["1h30m"], ["1h30m30s"]],
+    defaultValue: "1h",
+    description: ["Duration of each part in the following format: 1h30m10s."]
   },
   {
     name: ["--concurrency"],

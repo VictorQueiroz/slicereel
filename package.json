@@ -16,7 +16,8 @@
     "*.{map,js,d.ts,ts}"
   ],
   "scripts": {
-    "prepublishOnly": "npx ts-node createHelperFile.ts && npx tsc -b . --force"
+    "test": "node --require ts-node/register --test test.ts",
+    "prepublishOnly": "npm test && npx ts-node createHelperFile.ts && npx tsc -b . --force"
   },
   "dependencies": {
     "child-process-utilities": "^0.0.10",

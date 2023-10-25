@@ -24,7 +24,7 @@ In the example below, all the parts will be saved in the `input.mp4.parts` folde
 - input.40m-50m.mp4
 
 ```bash
-slicereel -i input.mp4 -o input.mp4.parts -d 20 --out-extension mp4
+slicereel -i input.mp4 -o input.mp4.parts -d 20m --out-extension mp4
 ```
 
 ### Resizing the video
@@ -38,12 +38,12 @@ slicereel -i input.mp4 -o input.mp4.parts --width 200
 ### You can define video/audio bitrate
 
 ```bash
-slicereel -i input.mp4 -o input.mp4.parts -d 10 --video-bitrate 1M --audio-bitrate 32k
+slicereel -i input.mp4 -o input.mp4.parts -d 10m --video-bitrate 1M --audio-bitrate 32k
 ```
 
 ### Defining the frames-per-second
 
-If the input video has 60fps, and you want to output a video with 20fps, you can do it like this. Since we omitted the -d argument, it will default to 60 minutes per part:
+If the input video has 60fps, and you want to output a video with 20fps, you can do it like this. Since we omitted the -d argumentm, it will default to 60 minutes per part:
 
 ```bash
 slicereel -i input.mp4 -o input.mp4.parts --fps 20
@@ -52,7 +52,7 @@ slicereel -i input.mp4 -o input.mp4.parts --fps 20
 ### Outputting slices of the audio of the video
 
 ```bash
-slicereel -i input.mp4 -o input.mp4.parts -d 10 --out-extension opus --audio-bitrate 32k
+slicereel -i input.mp4 -o input.mp4.parts -d 10m --out-extension opus --audio-bitrate 32k
 ```
 
 ### Concurrency and FFmpeg threading
@@ -67,4 +67,34 @@ If you're using Linux or macOS, you can use all threads available:
 
 ```bash
 slicereel -i input.mp4 -o input.mp4.parts --threads $(nproc)
+```
+
+### Duration format
+
+For setting each part to have 1 hour and 30 minutes, you can use the following format:
+
+```bash
+slicereel -i video.mp4 -d 1h30m
+```
+
+If you wish 10 hour and 30 minutes, you can use:
+
+```bash
+slicereel -i video.mp4 -d 10h30m
+```
+
+Or, if you wish 10 minutes and 30 seconds, you can use:
+
+```bash
+slicereel -i video.mp4 -d 10m30s
+```
+
+### More help
+
+```bash
+slicereel --help
+```
+
+```bash
+slicereel -h
 ```
