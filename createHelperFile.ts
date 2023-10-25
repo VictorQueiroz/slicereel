@@ -48,14 +48,14 @@ const lines: IArgumentDescription[] = [
   {
     name: ["--concurrency"],
     args: ["number"],
-    examples: [[1, 4]],
+    examples: [[1], [4], [20]],
     defaultValue: 1,
     description: ["Number of parts to process at the same time."]
   },
   {
     name: ["--threads"],
     args: ["number"],
-    examples: [[1, 4, "$(nproc)"]],
+    examples: [[1], [4], ["$(nproc)"]],
     defaultValue: 1,
     description: ["Amount of threads to use for each part."]
   },
