@@ -15,7 +15,6 @@ import Time from "./Time";
 import getRatio from "./getRatio";
 import isOdd from "./isOdd";
 import getFileDuration from "./getFileDuration";
-import chalk from "chalk";
 
 (async () => {
   const args = process.argv.slice(2);
@@ -61,7 +60,7 @@ import chalk from "chalk";
       new RegExp(`.${path.extname(inputFile)}$`),
       ".slicereel.output.parts"
     );
-    console.log("Automatically using output directory: %o", chalk.red(outDir));
+    console.log("Automatically using output directory: %o", outDir);
     clearOutDir = forceClearOutDir;
   } else if (forceClearOutDir) {
     throw new Exception("You cannot use --force-rm with --output");
