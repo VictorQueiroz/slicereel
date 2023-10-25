@@ -211,12 +211,14 @@ import chalk from "chalk";
       videoFilters.set("fps", `${fps}`);
     }
 
+    if (videoFilters.size) {
       ffmpegArgs.push(
         "-vf",
         Array.from(videoFilters)
           .map(([k, v]) => `${k}=${v}`)
           .join(",")
       );
+    }
 
     /**
      * add output file as the last argument
