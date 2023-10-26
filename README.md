@@ -41,6 +41,32 @@ slicereel -i input.mp4 -o input.mp4.parts --width 200
 slicereel -i input.mp4 -o input.mp4.parts -d 10m --video-bitrate 1M --audio-bitrate 32k
 ```
 
+### Trimming
+
+You can tell the command-line tool to start creating the parts from a certain part of the video using the `--skip` argument. For instance, if you want to start from the 10th minute of the video, you can do it like this:
+
+```bash
+slicereel -i input.mp4 --skip 6m10s
+```
+
+If you want to get just the first hour of the video, you can do:
+
+```bash
+slicereel -i input.mp4 --until 1h
+```
+
+Or if you want to skip the first 5 minutes, but stop at end of the first hour of the video, which will result in a **55 minutes video**, you can do:
+
+```bash
+slicereel -i input.mp4 --skip 5m --until 1h
+```
+
+If you're not interested in creating multiple parts of the video. You can tweak this functionality to emit just a single part of the video by setting the duration to the end of the video. For instance, if you want to get just the first 5 minutes of the video, you can do:
+
+```bash
+slicereel -i input.mp4 --until 5m --duration 5m
+```
+
 ### Defining the frames-per-second
 
 If the input video has 60fps, and you want to output a video with 20fps, you can do it like this. Since we omitted the -d argumentm, it will default to 60 minutes per part:
@@ -88,6 +114,14 @@ Or, if you wish 10 minutes and 30 seconds, you can use:
 ```bash
 slicereel -i video.mp4 -d 10m30s
 ```
+
+You can also pass repeated sequences, like:
+
+```bash
+slicereel -i video.mp4 -d 10s10s10s1s
+```
+
+It will result in 31 seconds for each part, as expected.
 
 ### More help
 
