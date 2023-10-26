@@ -137,7 +137,7 @@ import TimeStringParser from "./TimeStringParser";
       `${path
         .basename(inputFile)
         .replace(
-          /(\.[A-Za-z]+)$/,
+          /(\.[A-Za-z0-9]+)$/,
           `.${Time.format(startTime)}-${Time.format(endTime)}.${outExtension}`
         )}`
     );
