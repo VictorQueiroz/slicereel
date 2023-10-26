@@ -25,10 +25,10 @@ import TimeStringParser from "./TimeStringParser";
     fs.createReadStream(path.resolve(__dirname, "HELP")).pipe(process.stdout);
     return;
   }
-  const humanReadableDuration =
-    getNamedArgument(args, "--duration", getString) ??
-    getNamedArgument(args, "-d", getString) ??
-    "1h";
+  const partDuration =
+    getNamedArgument(args, "--duration", getDuration) ??
+    getNamedArgument(args, "-d", getDuration) ??
+    Time.HOUR;
   const inputFile = getNamedArgument(args, "-i", getResolvedString);
   const concurrency = getNamedArgument(args, "--concurrency", getInteger) ?? 1;
   const threads = getNamedArgument(args, "--threads", getInteger) ?? 1;
@@ -99,11 +99,6 @@ import TimeStringParser from "./TimeStringParser";
   } catch (reason) {
     await fs.promises.mkdir(outDir, { recursive: true });
   }
-
-  /**
-   * part duration in seconds
-   */
-  const partDuration = new TimeStringParser(humanReadableDuration).parse();
 
   /**
    * total duration of the file in seconds
