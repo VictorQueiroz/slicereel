@@ -46,6 +46,24 @@ const lines: IArgumentDescription[] = [
     description: ["Duration of each part in the following format: 1h30m10s."]
   },
   {
+    name: ["--skip", "--start-from"],
+    args: ["string"],
+    examples: [["30m"], ["1h"], ["1h30m"], ["1h30m30s"]],
+    defaultValue: "0s",
+    description: ["Change the start of the file from 0s to the passed value."]
+  },
+  {
+    name: ["--until"],
+    args: ["string"],
+    examples: [["30m"], ["1h"], ["1h30m"], ["1h30m30s"]],
+    defaultValue: null,
+    description: [
+      "Only consider the total file duration until the passed value.",
+      "For instance, if the file has 10h30m, and you pass --until 8h, it will consider the 8 hours of the file starting from the start of the file.",
+      "By adding --skip when using this argument, it will simply change the start of the file."
+    ]
+  },
+  {
     name: ["--concurrency"],
     args: ["number"],
     examples: [[1], [4], [20]],

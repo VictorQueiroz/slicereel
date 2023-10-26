@@ -13,9 +13,10 @@ import path from "path";
 import getResolvedString from "./getResolvedString";
 import Time from "./Time";
 import getRatio from "./getRatio";
-import isOdd from "./isOdd";
 import getFileDuration from "./getFileDuration";
-import TimeStringParser from "./TimeStringParser";
+import getDuration from "./getDuration";
+import spliceArray from "./spliceArray";
+import adjustWidthFromRatio from "./adjustWidthFromRatio";
 
 (async () => {
   const args = process.argv.slice(2);
@@ -29,6 +30,8 @@ import TimeStringParser from "./TimeStringParser";
     getNamedArgument(args, "--duration", getDuration) ??
     getNamedArgument(args, "-d", getDuration) ??
     Time.HOUR;
+  const skip = getNamedArgument(args, "--skip", getDuration) ?? Time.ZERO;
+  const preset = getNamedArgument(args, "--preset", getString);
   const inputFile = getNamedArgument(args, "-i", getResolvedString);
   const concurrency = getNamedArgument(args, "--concurrency", getInteger) ?? 1;
   const threads = getNamedArgument(args, "--threads", getInteger) ?? 1;
@@ -39,10 +42,8 @@ import TimeStringParser from "./TimeStringParser";
     false;
   const outExtension =
     getNamedArgument(args, "--out-extension", getString) ?? "mp4";
-  const videoBitrate =
-    getNamedArgument(args, "--video-bitrate", getString) ?? "1M";
-  const audioBitrate =
-    getNamedArgument(args, "--audio-bitrate", getString) ?? "32k";
+  const videoBitrate = getNamedArgument(args, "--video-bitrate", getString);
+  const audioBitrate = getNamedArgument(args, "--audio-bitrate", getString);
   let clearOutDir = getArgument(args, "--rm") !== null;
   let width =
     getNamedArgument(args, "-w", getInteger) ??
@@ -50,6 +51,7 @@ import TimeStringParser from "./TimeStringParser";
   assert.strict.ok(inputFile !== null, "-i is required");
   let outDir = getNamedArgument(args, "-o", getResolvedString);
   const forceClearOutDir = getArgument(args, "--force-rm") !== null;
+  const dryRun = getArgument(args, "--dry-run") !== null;
 
   if (outDir === null) {
     assert.strict.ok(
@@ -70,12 +72,6 @@ import TimeStringParser from "./TimeStringParser";
     await fs.promises.access(inputFile, fs.constants.R_OK);
   } catch (reason) {
     throw new Error(`Input file ${inputFile} does not exist`);
-  }
-
-  const spareArgument = args.shift();
-
-  if (spareArgument) {
-    throw new Error(`Unexpected argument ${spareArgument}`);
   }
 
   assert.strict.ok(
@@ -104,35 +100,65 @@ import TimeStringParser from "./TimeStringParser";
    * total duration of the file in seconds
    */
   const totalDuration = await getFileDuration(inputFile);
+  const givenUntil = getNamedArgument(args, "--until", getDuration);
 
-  const ratio = await getRatio(inputFile);
-
-  if (width !== null) {
-    const oldWidth = width;
-    while (
-      Math.floor(width / ratio) !== width / ratio ||
-      isOdd(width / ratio)
-    ) {
-      width++;
+  if (givenUntil !== null) {
+    if (givenUntil > totalDuration) {
+      throw new Error(
+        `--until ${Time.format(
+          givenUntil
+        )} is greater than the total duration of the file ${Time.format(
+          totalDuration
+        )}`
+      );
     }
-    if (width !== oldWidth) {
-      console.warn(
-        `Warning: --width ${oldWidth} is not divisible by the aspect ratio ${ratio}. Using --width ${width} instead.`
+    if (givenUntil < skip) {
+      throw new Error(
+        `--until ${Time.format(givenUntil)} is less than --skip ${Time.format(
+          skip
+        )}`
       );
     }
   }
 
+  const until = givenUntil ?? totalDuration;
+
+  const spareArgument = args.shift();
+
+  if (spareArgument) {
+    throw new Error(`Unexpected argument ${spareArgument}`);
+  }
+
+  const ratio = await getRatio(inputFile);
+
+  if (width !== null) {
+    width = adjustWidthFromRatio(width, ratio);
+  }
+
   const pending = new Array<Promise<void>>();
 
-  const partCount = Math.ceil(totalDuration / partDuration);
+  const partCount = Math.ceil(until / partDuration);
+  let startTime: number, i: number, endTime: number, initialStartTime: number;
+  const ffmpegArgs = new Array<string>();
+  const videoFilters = new Map<string, string>();
+  let outputPart: string;
 
-  for (let i = 0; i < partCount; i++) {
+  if (dryRun) {
+    console.log("Here are the commands that will be run:");
+  }
+
+  for (i = 0; i < partCount; i++) {
     if (pending.length >= concurrency) {
       await Promise.all(pending.splice(0, 1));
     }
-    const startTime = i * partDuration;
-    const endTime = Math.min(totalDuration, startTime + partDuration);
-    const outputPart = path.resolve(
+    initialStartTime = i * partDuration;
+    if (i === 0) {
+      startTime = initialStartTime + skip;
+    } else {
+      startTime = initialStartTime;
+    }
+    endTime = Math.min(until, initialStartTime + partDuration);
+    outputPart = path.resolve(
       outDir,
       `${path
         .basename(inputFile)
@@ -141,8 +167,6 @@ import TimeStringParser from "./TimeStringParser";
           `.${Time.format(startTime)}-${Time.format(endTime)}.${outExtension}`
         )}`
     );
-    const ffmpegArgs = new Array<string>();
-
     if (compat) {
       ffmpegArgs.push("-profile:v", "baseline", "-level", "3.0");
     }
@@ -154,14 +178,20 @@ import TimeStringParser from "./TimeStringParser";
       "-i",
       inputFile,
       "-threads",
-      `${threads}`,
+      `${threads}`
+    );
+    if (videoBitrate !== null) {
+      /**
+       * video bitrate
+       */
+      ffmpegArgs.push("-b:v", videoBitrate);
+    }
+    if (audioBitrate !== null) {
       /**
        * audio bitrate
        */
-      "-b:a",
-      audioBitrate
-    );
-    const videoFilters = new Map<string, string>();
+      ffmpegArgs.push("-b:a", audioBitrate);
+    }
     switch (outExtension) {
       case "aac":
         ffmpegArgs.push(
@@ -184,11 +214,6 @@ import TimeStringParser from "./TimeStringParser";
         throw new Exception(`Unsupported output format ${outExtension}`);
       case "mp4":
         ffmpegArgs.push(
-          /**
-           * video bitrate
-           */
-          "-b:v",
-          videoBitrate,
           /**
            * video codec
            */
@@ -214,12 +239,34 @@ import TimeStringParser from "./TimeStringParser";
       );
     }
 
+    if (preset !== null) {
+      ffmpegArgs.push("-preset", preset);
+    }
+
     /**
      * add output file as the last argument
      */
     ffmpegArgs.push(outputPart);
 
-    pending.push(spawn("ffmpeg", ffmpegArgs).wait());
+    if (dryRun) {
+      console.log(
+        "\tffmpeg",
+        spliceArray(ffmpegArgs)
+          .map((s, index, args) => {
+            const previousArg = index > 0 ? args[index - 1] ?? null : null;
+            const shouldIndent =
+              s.startsWith("-") ||
+              (previousArg && !previousArg.startsWith("-"));
+            if (shouldIndent) {
+              s = `\n\t\t${s}`;
+            }
+            return s;
+          })
+          .join(" ")
+      );
+    } else {
+      pending.push(spawn("ffmpeg", spliceArray(ffmpegArgs)).wait());
+    }
   }
   await Promise.all(pending.splice(0, pending.length));
 })().catch((reason) => {
