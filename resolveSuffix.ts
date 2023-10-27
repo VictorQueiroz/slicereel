@@ -8,12 +8,12 @@ export default function resolveSuffix(
     part: number;
   }
 ) {
-  const startTime = /\$startTime/;
-  const endTime = /\$endTime/;
-  const part = /\$part/;
+  const startTime = /:startTime/;
+  const endTime = /:endTime/;
+  const part = /:part/;
   if (!startTime.test(value) || !endTime.test(value)) {
     throw new Error(
-      `--suffix must contain $startTime and $endTime, but it is ${value}`
+      `--suffix must contain :startTime and :endTime, but it is ${value}`
     );
   }
   for (const v of [

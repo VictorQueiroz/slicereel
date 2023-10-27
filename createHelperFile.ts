@@ -41,14 +41,14 @@ const lines: IArgumentDescription[] = [
   {
     name: ["--suffix"],
     args: ["string"],
-    defaultValue: ".$startTime-$endTime-$part",
-    examples: [[".$startTime-$endTime-$part"], [".$startTime-$endTime"]],
+    defaultValue: ".:startTime-:endTime-:part",
+    examples: [[".:startTime-:endTime-:part"], [".:startTime-:endTime"]],
     description: [
       [
         "Suffix of each part file name. It will be added before the output file extension (i.e. .opus). It can contain the following variables:\n",
-        "\t$startTime: start time of the part",
-        "\t$endTime: end time of the part",
-        "\t$part: part number - optional"
+        "\t:startTime: start time of the part",
+        "\t:endTime: end time of the part",
+        "\t:part: part number - optional"
       ].join("\n")
     ]
   },

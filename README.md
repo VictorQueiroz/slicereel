@@ -46,7 +46,7 @@ slicereel -i input.mp4 -o input.mp4.parts -d 10m --video-bitrate 1M --audio-bitr
 If you want to add a suffix to the output files, you can use the `--suffix` argument. For instance, if you want to add the suffix `part` to the output files, you can do it like this:
 
 ```bash
-slicereel -i input.mp4 -o input.mp4.parts -d 10m --suffix "$startTime-$endTime-part-number-$part"
+slicereel -i input.mp4 -o input.mp4.parts -d 10m --suffix ":startTime-:endTime-part-number-:part"
 ```
 
 ### Trimming

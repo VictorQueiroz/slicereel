@@ -39,7 +39,7 @@ import resolveSuffix from "./resolveSuffix";
   const fps = getNamedArgument(args, "--fps", getInteger);
   const suffix =
     getNamedArgument(args, "--suffix", getString) ??
-    ".$startTime-$endTime-$part";
+    ".:startTime-:endTime-:part";
   const compat =
     getArgument(args, "--compat") ??
     getArgument(args, "--compatibility") ??
