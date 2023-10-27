@@ -41,6 +41,14 @@ slicereel -i input.mp4 -o input.mp4.parts --width 200
 slicereel -i input.mp4 -o input.mp4.parts -d 10m --video-bitrate 1M --audio-bitrate 32k
 ```
 
+### Suffixed output files
+
+If you want to add a suffix to the output files, you can use the `--suffix` argument. For instance, if you want to add the suffix `part` to the output files, you can do it like this:
+
+```bash
+slicereel -i input.mp4 -o input.mp4.parts -d 10m --suffix "$startTime-$endTime-part-number-$part"
+```
+
 ### Trimming
 
 You can tell the command-line tool to start creating the parts from a certain part of the video using the `--skip` argument. For instance, if you want to start from the 10th minute of the video, you can do it like this:
