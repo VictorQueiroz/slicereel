@@ -17,6 +17,7 @@ import getFileDuration from "./getFileDuration";
 import getDuration from "./getDuration";
 import spliceArray from "./spliceArray";
 import adjustWidthFromRatio from "./adjustWidthFromRatio";
+import resolveSuffix from "./resolveSuffix";
 
 (async () => {
   const args = process.argv.slice(2);
@@ -36,6 +37,9 @@ import adjustWidthFromRatio from "./adjustWidthFromRatio";
   const concurrency = getNamedArgument(args, "--concurrency", getInteger) ?? 1;
   const threads = getNamedArgument(args, "--threads", getInteger) ?? 1;
   const fps = getNamedArgument(args, "--fps", getInteger);
+  const suffix =
+    getNamedArgument(args, "--suffix", getString) ??
+    ".$startTime-$endTime-$part";
   const compat =
     getArgument(args, "--compat") ??
     getArgument(args, "--compatibility") ??
@@ -160,12 +164,14 @@ import adjustWidthFromRatio from "./adjustWidthFromRatio";
     endTime = Math.min(until, initialStartTime + partDuration);
     outputPart = path.resolve(
       outDir,
-      `${path
-        .basename(inputFile)
-        .replace(
-          /(\.[A-Za-z0-9]+)$/,
-          `.${Time.format(startTime)}-${Time.format(endTime)}.${outExtension}`
-        )}`
+      `${path.basename(inputFile).replace(
+        /(\.[A-Za-z0-9]+)$/,
+        resolveSuffix(suffix, {
+          startTime,
+          endTime,
+          part: i
+        })
+      )}`
     );
     if (compat) {
       ffmpegArgs.push("-profile:v", "baseline", "-level", "3.0");
