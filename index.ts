@@ -146,6 +146,7 @@ import resolveSuffix from "./resolveSuffix";
   const ffmpegArgs = new Array<string>();
   const videoFilters = new Map<string, string>();
   let outputPart: string;
+  let partSuffix: string;
 
   if (dryRun) {
     console.log("Here are the commands that will be run:");
@@ -162,16 +163,16 @@ import resolveSuffix from "./resolveSuffix";
       startTime = initialStartTime;
     }
     endTime = Math.min(until, initialStartTime + partDuration);
+    partSuffix = resolveSuffix(suffix, {
+      startTime,
+      endTime,
+      part: i
+    });
     outputPart = path.resolve(
       outDir,
-      `${path.basename(inputFile).replace(
-        /(\.[A-Za-z0-9]+)$/,
-        resolveSuffix(suffix, {
-          startTime,
-          endTime,
-          part: i
-        })
-      )}`
+      `${path
+        .basename(inputFile)
+        .replace(/(\.[A-Za-z0-9]+)$/, `${partSuffix}.${outExtension}`)}`
     );
     if (compat) {
       ffmpegArgs.push("-profile:v", "baseline", "-level", "3.0");
