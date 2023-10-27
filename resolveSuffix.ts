@@ -10,7 +10,9 @@ export default function resolveSuffix(
   const endTime = /\$endTime/;
   const part = /\$part/;
   if (!startTime.test(value) || !endTime.test(value)) {
-    throw new Error(`--suffix must contain either $startTime and $endTime`);
+    throw new Error(
+      `--suffix must contain $startTime and $endTime, but it is ${value}`
+    );
   }
   for (const v of [
     { test: startTime, value: context.startTime },
