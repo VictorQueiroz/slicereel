@@ -1,4 +1,4 @@
-import { getString } from "cli-argument-helper";
+import { getString } from "cli-argument-helper/string";
 import TimeStringParser from "./TimeStringParser";
 
 /**
